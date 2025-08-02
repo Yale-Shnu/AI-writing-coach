@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手把手AI系列 | by SHNUYL</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #f8f9fa;
+            --text: #34495e;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            max-width: 900px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background: var(--light);
+            line-height: 1.6;
+            color: var(--text);
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin: 1.5rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+        }
+
+        .menu-group {
+            margin: 1.5rem 0;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background: white;
+            transition: transform 0.2s ease;
+        }
+
+        .menu-group:hover {
+            transform: translateY(-2px);
+        }
+
+        .menu-header {
+            padding: 1.2rem 2rem;
+            background: linear-gradient(135deg, var(--primary), #2980b9);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: clamp(0.95rem, 2vw, 1rem);
+        }
+
+        .submenu-content {
+            padding: 1.5rem;
+            display: none;
+            border-top: 2px solid rgba(52, 152, 219, 0.1);
+        }
+
+        .active .submenu-content {
+            display: block;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            align-items: center;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            max-width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .tool-selector {
+            display: flex;
+            gap: 0.8rem;
+            background: #f4f6f8;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-left: auto;
+        }
+
+        .tool-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .tool-radio {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .tool-radio:checked::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 10px;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: 50%;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: auto;
+            min-width: 120px;
+        }
+
+        button.inline-btn {
+            width: auto;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .output-area {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid rgba(52, 152, 219, 0.1);
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .loading {
+            color: #7f8c8d;
+            padding: 1rem;
+            text-align: center;
+            font-style: italic;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #titleInput {
+            margin-bottom: 1rem;
+        }
+
+        .assist-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        #assistType {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .two-col-selects {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .menu-header {
+                padding: 1rem;
+            }
+
+            .submenu-content {
+                padding: 1rem;
+            }
+
+            .assist-controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .assist-controls > div:first-child {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            #assistType, button.inline-btn {
+                width: 100% !important;
+            }
+
+            .tool-selector {
+                margin-left: 0;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .two-col-selects {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.8rem;
+            }
+
+            .output-area {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+.error {
+    color: #e74c3c;
+    padding: 1rem;
+    background: #fdecea;
+    border-radius: 8px;
+}
+
+.response-content {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    line-height: 1.8;
+}
+
+.response-content strong {
+    color: #e74c3c;
+    font-weight: bold;
+}
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            z-index: 100;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        footer img {
+            position: absolute;
+            right: 629px;
+            top: 410px;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>手把手·AI写作教练 | 高中语文V2.1.1版</h1>
+
+    <!-- 作文题库模块 -->
+    <div class="menu-group">
+        <div class="menu-header" onclick="toggleMenu('qbank')">📖 作文题库</div>
+        <div id="qbank" class="submenu-content">
+            <div class="two-col-selects">
+                <select id="examType" onchange="loadQuestions()">
+                    <option value="gaokao">上海高考作文题目</option>
+                    <option value="mock">上海模考作文题目</option>
+                </select>
+                <select id="questionList" onchange="showQuestion()"></select>
+            </div>
+            <div id="questionOutput" class="output-area"></div>
+        </div>
+    </div>
+
+    <!-- 智能指导模块 -->
+    <div class="menu-group">
+        <div class="menu-header" onclick="toggleMenu('assist')">💡 我要求助</div>
+        <div id="assist" class="submenu-content">
+            <input type="text" id="titleInput" placeholder="请输入作文题目或关键词（生成结果不满意可多尝试几次，电脑版复制粘贴用快捷键ctrl+c/v）">
+            
+            <div class="assist-controls">
+                <div style="display: flex; gap: 1rem; flex: 1;">
+                    <select id="assistType">
+                        <option value="concept">审题立意</option>
+                        <option value="argument">提炼论点</option>
+                        <option value="evidence">提供论据</option>
+                        <option value="outline">搭建提纲</option>
+                        <option value="sample">生成范文</option>
+                    </select>
+                    <button onclick="handleAssist()" class="inline-btn">获取指导</button>
+                </div>
+                
+                <div class="tool-selector">
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="tool" value="glm" checked>
+                        智谱
+                    </label>
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="tool" value="gpt">
+                        GPT
+                    </label>
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="tool" value="deepseek">
+                        DeepSeek
+                    </label>
+                </div>
+            </div>
+            
+            <div id="assistOutput" class="output-area"></div>
+        </div>
+    </div>
+
+    <!-- 作文修改模块 -->
+    <div class="menu-group">
+        <div class="menu-header" onclick="toggleMenu('revise')">✍️ 帮我修改</div>
+        <div id="revise" class="submenu-content">
+            <textarea id="contentInput" rows="6" placeholder="请输入需要修改的作文内容（不超过1100字，电脑版复制粘贴用快捷键ctrl+c/v）"></textarea>
+            <div class="assist-controls">
+                <button onclick="handleRevise()" class="inline-btn">获取修改建议</button>
+                <div class="tool-selector">
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="reviseTool" value="glm" checked>
+                        智谱
+                    </label>
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="reviseTool" value="gpt">
+                        GPT
+                    </label>
+                    <label class="tool-option">
+                        <input type="radio" class="tool-radio" name="reviseTool" value="deepseek">
+                        DeepSeek
+                    </label>
+                </div>
+            </div>
+            <div id="reviseOutput" class="output-area"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div></div>  
+        <div>© 2025 SHNUYL 版权所有 | 手把手 · AI工具系列</div>
+    </footer>
+
+    <script>
+        const API_CONFIG = {
+            glm: {
+                endpoint: "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                key: "c133879b5bee426bbab21944c05fddd3.pYFGJEqyqXofQoZd",
+                model: "glm-4"
+            },
+            gpt: {
+                endpoint: "https://api.chatanywhere.tech/v1/chat/completions",
+                key: "sk-D2h2jiFqA08Iac858rjWohNdPyrJ2rzecQei3UMo67CxBELQ",
+                model: "gpt-4o-mini"
+            },
+            deepseek: {
+                endpoint: "https://api.deepseek.com/chat/completions",
+                key: "sk-9f9a27027a0d4652aeb9466aff6f565f",
+                model: "deepseek-chat"
+            }
+        };
+
+        const QUESTION_BANK = {
+            gaokao: [
+                {title: "2025秋考", content: "有学者用“专”“转”“传”概括当下三类文章：“专”指专业文章；“转”指被转发的通俗文章；“传”指获得广泛传播的佳作，甚至是传世文章。他提出，专业文章可以变成被转发的通俗文章，而面对大量“转”文，读者又不免期待可传世的文章。由“专”到“传”，必定要经过“转”吗？"},
+                {title: "2025春考", content: "我们的劳动使大地改变了模样，在大地的模样里我们看到了自己。"},
+                {title: "2024秋考", content: "生活中，人们常用认可度判别事物，区分高下。请谈谈对“认可度”的认识和思考。"},
+                {title: "2024春考", content: "对已有知识的综合，是创新吗？"},
+                {title: "2023秋考", content: "一个人乐意去探索陌生世界，仅仅是因为好奇心吗？"},
+                {title: "2023春考", content: "有人说，所有重要的东西在很早以前就提到过了。你是否认同这一观点？"},
+                {title: "2022秋考", content: "小时候人们喜欢发问，长大后往往看重结论。对此，有人感到担忧，有人觉得正常，你有怎样的思考？"},
+                {title: "2022春考", content: "人们倾向与认为“浓缩的就是精华”"},
+                {title: "2021秋考", content: "有人说，经过时间的沉淀，事物的价值才能被人们认识；也有人认为不尽如此。"},
+                {title: "2021春考", content: "有人说，你怎么做，就会成为什么样的人，也有人觉得不尽如此。"},
+                {title: "2020秋考", content: "世上许多重要的转折是在意想不到时发生的，这是否意味着人对事物发展进程无能为力？"}
+            ],
+            mock: [
+                 {title: "2025杨浦三模", content: "作家余华曾经说：“无论写作还是人生，正确的出发都是走进‘窄门’，不要被宽阔的‘大门’所迷惑，那里面的路没有多长。”"},
+                {title: "2025华二三模", content: "有人说，你对一个人的期待越高，这个人所取得的成就也会越大。"},
+                {title: "2025浦东三模", content: "小时候，行走常常是对世界的探索；长大后，行走往往是为了到达目的地。"},
+                {title: "2025黄浦二模", content: "时间加速化并不会令人感到充实，反而会使人们觉得生活从未真正开始过。"},
+                {title: "2025崇明二模", content: "生活中，人们往往因为担忧行动后的结果而放弃行动。"},
+                {title: "2025嘉定二模", content: "有人说：人是一根会思考的芦苇。"},
+                {title: "2025浦东二模", content: "我们奋斗的目的是为了改变世界，还是不让世界改变我们？"},
+                {title: "2025徐汇二模", content: "我们常会感受到他人的期待带来的压力。那么，我们是否不该被他人的期待所影响?"},
+                {title: "2025闵行二模", content: "小明:“在科技日益进步的当下，人们更需珍惜可以试错的机会。小亮:“犯错就应承担相应的责任，怎么还要珍惜试错的机会呢?”小明:“我说的是试错，不是犯错。”小亮:“难道随着科技进步，人类试错的机会在减少吗?”小明:“我觉得是在减少。”请写一篇文章，谈谈你对小明的话的认识和思考。"},
+                {title: "2025奉贤二模", content: "达克效应”是一种心理现象，指能力弱的人会对自己作出过高评价，而能力高的人却会作出较低的评价。这一心理学现象引发我们对于自我认知的思考，请谈谈你的看法。"},
+                {title: "2025静安二模", content: "某中学的校训是：未来各行业里的创新人才就在这里成长。请问，中学阶段的创新，主要是教育学生遵守规则，还是培养他们打破规则的习惯于能力?"},
+                {title: "2025松江二模", content: "有人说，在屏幕中认识蝴蝶的孩子，将在现实中失去飞翔的翅膀。对此，你是否认同?"},
+                {title: "2025虹口二模", content: "人是一根会思想的芦苇，一旦强大的机器成为思想的引擎，必将给芦苇带来深刻的变化。"},
+                {title: "2025普陀二模", content: "有人说，懂得悲悯，方知生活的重量。"},
+                {title: "2025长宁二模", content: "网络评论区的情绪表达往往直接而激烈，这在激活公共讨论的同时，也让人产生不少忧虑。"},
+                {title: "2025杨浦二模", content: "营养师精确计算每餐的卡路里，运动手环监测着每一次心跳呼吸，有人担忧：我们越来越习惯用精细化的标尺丈量生活，却往往遗忘了生活本身。"},
+                {title: "2025宝山二模", content: "怜悯是人的天性，但是也有人说：“只有非常不幸的人才能有怜悯别人的权利。”"},
+                {title: "2025金山二模", content: "生活中，人们往往因急于求成而产生忧虑，然而，很多事情未必如自己所忧虑的那样。"},
+                {title: "2025青浦二模", content: "生活中，人们常寄希望于努力提升自己来更好地掌控自己的命运。"},
+                {title: "2024徐汇一模", content: "我们更应突破自身的局限性，还是接受自身的局限性？"},
+                {title: "2024静安一模", content: "低头划手机干扰了现场感知及人际关系；但有人认为，低头划手机主要是在寻找让自己有归属感的地方。"},
+                {title: "2024杨浦一模", content: "在现代社会，高清纪录片可呈现热带雨林的繁茂、极地冰川的壮丽，虚拟现实设备能模拟漫步山间、泛舟胡海的惬意，打开手机就能欣赏美景直播......然而，仍有许多人执着于亲身奔赴自然。"},
+                {title: "2024闵行一模", content: "大明感叹道：“我听过许多道理，但还是过不好自己的生活”。"},
+                {title: "2024宝山一模", content: "身处信息化时代，人们可以轻而易举获取大量信息。那么，获取更多的信息是否使人变得更聪明？"},
+                {title: "2024金山一模", content: "生活中，人们往往用常识去看待事物，做出判断。对此，你怎么看？"},
+                {title: "2024松江一模", content: "有人说，分歧比共识更有意义。对此，你是否认同？"},
+                {title: "2024青浦一模", content: "生活中有很多我们无法控制的事，这是否意味着我们只需要关心自己能控制的事？"},
+                {title: "2024浦东一模", content: "一个人履行责任是否意味着放弃自由？"},
+                {title: "2024嘉定一模", content: "生活中，人们往往用“有用”作为判别事物并做出选择的重要标准。"},
+                {title: "2024黄浦一模", content: "生活中，许多人选择“断舍离”，以更好地认清自己内心的真实所求。"}
+            ]
+        };
+
+        const PROMPT_TEMPLATES = {
+            concept: "作为上海高考作文命题和评阅专家，请为《{title}》提供审题立意指导：1. 关键词提取（3-5个核心词）；2. 逻辑关系图（使用ASCII绘制）；3. 以列表的形式提供5个符合要求的立意方向（1个立意方向=1个观点句，观点句的语句形式不要过于整齐），每个立意匹配一个10字以内的作文题目（不要出现主副标题的形式，中间也不要用逗号或冒号，字数和表述风格要有变化）；4. 推荐辩证分析角度3个（角度——以“观点句”的形式呈现；解释——即相应的辩证分析）；5. 不要涉及有关疫情的内容——这个提示语相关的内容只作为生成审题立意内容的规则，不要作为结果呈现出来，且只呈现结果，不需要额外的解释。",
+
+            argument: "请为《{title}》提炼论点系统，要求：1.核心论点（20字左右，使用递进或假设等复句，给出A、B两种风格的表述）+作文标题（匹配核心论点，提炼A、B两个标题，标题要求：10字以内，不要出现主副标题的形式，中间也不要使用逗号）；2. 三个分论点（体现逻辑层次）；3. 使用不同句式8个论点的变式写法，包含正、反、合的不同立场和写法，比如：-这种将认可度奉为圭臬的评判方式，实则是一把双刃剑，既可能指引方向，也可能遮蔽真相。-认可度确有其现实价值。作为一种集体智慧的结晶，它反映了大多数人的经验判断。-认可度之所以被广泛采用，正是因为它降低了认知成本，为复杂世界提供了简明的评判标准。-当认可度成为唯一标准时，群体的盲目性就会显现，形成法国思想家帕斯卡所说的‘真理在人数上的谬误’。-然而，认可度一旦被绝对化，就会演变为思维的暴政。·-面对认可度的双重性，我们需要建立批判性思维。-就像古希腊哲学家赫拉克利特所说：‘清醒的人有一个共同的世界，睡梦中的人各有各的世界。’我们应当既了解共同认知，又保持清醒的独立思考。-在这个众声喧哗的时代，认可度不应是评判事物的唯一坐标。-真正的价值判断需要我们在群体认知与个人理性之间找到平衡。",
+
+            evidence: "请为《{title}》提供四组论据，明确论据对论点的支撑：1.古代事例（课内+课外各一）；2.现当代案例（结合近一两年社会、科技、文化和其他等领域）；3.外国事例（课内+课外各一）；4.文学和社科经典名著的名言六则；5.先呈现上面的四组论据，再给出完整的构段示例（总-分-总的框架，用到上述四组论据中的两个）：[观点句]...+论据1（含对论据的分析）+论据2（含对论据的分析）+[结论句]。",
+
+            outline: "请为《{title}》生成两个议论文提纲，每个提纲要有小于10个字的标题，全文的逻辑关系要合理、紧密：【A版】标准结构：1. 中心论点 → 2. “诚然”引出的段落 → 3. “事实上”引出的段落 → 4. “不过”引出的段落 → 5. “更何况”引出的段落 → 6. “返观现实”引出的段落 → 7. 结论升华。【B版】变式结构：给出不同于上述提纲的新颖、深刻、严密的高考议论文提纲，但要符合高中生的认知与表达特点和水平，段落总数7段。",
+
+            sample: `请根据《{title}》的审题要求，生成三篇900字左右的范文：
+【范文A】标准版，要求：
+(1)全文共7段，900字左右
+(2)在合适的地方合理引用经典文学和社科名著的言论
+(3)除开头、结尾段以外，其他段落都采用“[观点句]...+论据1（含对论据的分析，嵌入作文题目中的关键词）+论据2（含对论据的分析，嵌入作文题目中的关键词）+[结论句]”的结构来写，观点句用加粗字体，但不要标注“论据1”“观点句”等提示词
+(4)标题尽量把作文题目的关键词嵌进去
+(5)标题的字数≤10字（不要用主副标题的形式）
+(6)直接呈现作文的题目（不要加书名号）、正文（用1.2.3.等数字标注段落序号），不要出现正文以外的提示词语
+(7)正文结尾用"（共……字）"的形式统计并注明正文的字数（但不要标注每段的字数）
+
+【范文B】定制版，要求：
+(1)全文共7段，900字左右
+(2)在合适的地方适当引用苏轼、红楼梦、乌合之众、柏拉图洞穴隐喻、信息茧房、单向度的人、极化人群、“人人都是麦克风”“大多数人是别人”等论据，但不要重复使用同一个论据
+(3)除开头、结尾段以外，其他段落都采用“[观点句]...+论据1（含对论据的分析，嵌入作文题目中的关键词）+论据2（含对论据的分析，嵌入作文题目中的关键词）+[结论句]”的结构来写，观点句用加粗字体，但不要标注“论据1”“观点句”等提示词
+(4)标题尽量把作文题目的关键词嵌进去
+(5)标题的字数≤10字（不要用主副标题的形式）
+(6)直接呈现作文的题目（不要加书名号）、正文（用1.2.3.等数字标注段落序号），不要出现正文以外的提示词语
+(7)正文结尾用"（共……字）"的形式统计并注明正文的字数（但不要标注每段的字数）`,
+
+         revise: `请参考以下要求对作文提出修改建议：第一，直接以清晰段落排版，禁止在标题和正文里使用#、/或*等符号。第二，提供三种修改方案：语言优化（锤炼题目、观点句，增进论据的分析，或使语言表述更严密），结构优化（增强语句、语段或全文的逻辑），论据优化（修正论据及相关分析，或替换其他更切题、新颖或深刻的论据），并具体说明修改理由。第三，语言优化和论据优化采用：【原题目】→【改后题目】（修改后的题目字数不要超过10字）；【原句】→【改句】逐条对比呈现。结构优化采用：【原提纲】→【改后提纲】的对比方式呈现。第四，最后给出修改后的完整的作文题目和正文——正文字数控制在900字左右，如果原作文不够7段则扩展为7段。第五，用字体加粗的方式标明各段的中心句，且正文结尾用'（共……字）'的形式统计并注明正文的字数\n{content}`,
+
+        };
+
+        async function callAPI(prompt, engine) {
+            const config = API_CONFIG[engine];
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${config.key}`
+            };
+
+            const bodyData = {
+                model: config.model,
+                messages: [{ role: "user", content: prompt }],
+                ...(engine === 'deepseek' ? {
+                    temperature: 0.85,
+                    top_p: 0.95,
+                    frequency_penalty: 0.5,
+                    presence_penalty: 0.4
+                } : {})
+            };
+
+            try {
+                const response = await fetch(config.endpoint, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify(bodyData)
+                });
+
+                if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+                const data = await response.json();
+                return data.choices[0].message.content.trim();
+            } catch (error) {
+                console.error('API错误:', error);
+                return `请求失败：${error.message}`;
+            }
+        }
+
+        function loadQuestions() {
+            const type = document.getElementById('examType').value;
+            const select = document.getElementById('questionList');
+            select.innerHTML = QUESTION_BANK[type].map((q, i) => 
+                `<option value="${i}">${q.title}</option>`
+            );
+            showQuestion();
+        }
+
+        function toggleMenu(menuId) {
+            const menu = document.getElementById(menuId);
+            menu.parentElement.classList.toggle('active');
+        }
+
+        function showQuestion() {
+            const type = document.getElementById('examType').value;
+            const index = document.getElementById('questionList').value;
+            document.getElementById('questionOutput').textContent = QUESTION_BANK[type][index].content;
+        }
+
+        async function handleAssist() {
+            const output = document.getElementById('assistOutput');
+            output.innerHTML = '<div class="loading">稍安勿躁，容我思量片刻...</div>';
+            
+            const title = document.getElementById('titleInput').value;
+            const assistType = document.getElementById('assistType').value;
+            const engine = document.querySelector('input[name="tool"]:checked').value;
+            
+            let prompt = PROMPT_TEMPLATES[assistType].replace('{title}', title);
+
+            if (engine === 'deepseek' && assistType === 'sample') {
+                prompt += `
+
+【特别要求】
+1. 双范文差异化控制：
+   - 结构差异：范文A用递进式，范文B用起承转合式或正反合式
+   - 案例组合：范文A侧重文史、哲学事例，范文B可适当增补社会学、科技或心理学等案例
+   - 修辞手法：范文A较少使用比喻、排比等修辞手法，范文B可放宽修辞手法的使用
+2. 创新约束：
+   - 每篇至少包含1个近两年新案例（2024-2025）
+   - 避免使用相同名人事例
+   - 标题字数不能多于10字，且不要用主副标题的形式
+   - 要符合高中生的认知与表达特点和水平`;
+            }
+
+const response = await callAPI(prompt, engine);
+
+function markdownToHTML(text) {
+    if (!text) return '';
+
+    // 先处理标题（### → <h3>）
+    let html = text
+        .replace(/^#{1,6}\s*(.*?)\s*#*$/gm, (match, content) => {
+            const level = Math.min(match.trim().match(/#/g).length, 6); // 限制 h1-h6
+            return `<h${level}>${content.trim()}</h${level}>`;
+        })
+        // 处理加粗（**bold** → <strong>bold</strong>）
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        // 处理斜体（*italic* → <em>italic</em>）
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        // 处理代码块（`code` → <code>code</code>）
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        // 处理无序列表（- item → <li>item</li>）
+        .replace(/^\s*[-*+]\s+(.*$)/gm, '<li>$1</li>')
+        // 清理残留的 # 和 *（确保没有未转换的符号）
+        .replace(/(^|\s)([#*]+)(\s|$)/g, '$1$3')
+        // 保留换行（\n → <br>）
+        .replace(/\n/g, '<br>');
+
+    // 自动包裹 <ul>（如果存在 <li>）
+    if (html.includes('<li>')) {
+        html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+    }
+
+    return html;
+}
+    output.innerHTML = markdownToHTML(response); 
+    // ▲▲▲ 替换这里结束 ▲▲▲
+}
+async function handleRevise() {
+    const output = document.getElementById('reviseOutput');
+    output.innerHTML = '<div class="loading">别着急，容我捋捋思路...</div>';
+    
+    try {
+        const content = document.getElementById('contentInput').value;
+        if (!content.trim()) {
+            output.innerHTML = '<div class="error">请输入需要修改的作文内容</div>';
+            return;
+        }
+
+        const engine = document.querySelector('input[name="reviseTool"]:checked').value;
+        const prompt = PROMPT_TEMPLATES.revise.replace('{content}', content);
+        
+        const response = await callAPI(prompt, engine);
+        
+        // 新增清理函数
+        const cleanResponse = cleanMarkdownSymbols(response);
+        output.innerHTML = `<div class="response-content">${cleanResponse}</div>`;
+        
+    } catch (error) {
+        console.error('修改建议获取失败:', error);
+        output.innerHTML = `<div class="error">获取修改建议失败: ${error.message}</div>`;
+    }
+}
+
+// 新增的清理函数
+function cleanMarkdownSymbols(text) {
+    if (!text) return '';
+    
+    // 替换所有Markdown符号
+    return text
+        .replace(/#+/g, '')  // 移除标题符号
+        .replace(/\*\*/g, '') // 移除加粗符号
+        .replace(/\*/g, '')   // 移除斜体和列表符号
+        .replace(/`/g, '')    // 移除代码符号
+        .replace(/- /g, '')   // 移除列表符号
+        .replace(/^\s*[-*+]\s+/gm, '') // 移除行首列表符号
+        .replace(/<\/?[a-z][^>]*>/gi, ''); // 移除HTML标签（如果有）
+}
+        window.onload = () => {
+            loadQuestions();
+            document.querySelectorAll('.menu-group').forEach(group => {
+                group.classList.add('active');
+            });
+        };
+    </script>
+</body>
+</html>
