@@ -3,168 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面已迁移 - AI写作教练</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>AI写作教练·高中语文</title>
+    <link rel="icon" href="logo.png" type="image/png">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Microsoft YaHei", sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            background: #f5f7fa;
+            color: #333;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
+            justify-content: center;
         }
         
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            padding: 40px;
             text-align: center;
-            max-width: 500px;
-            width: 100%;
-            animation: fadeIn 0.8s ease-out;
+            padding: 40px;
         }
         
-        .icon {
-            font-size: 64px;
-            color: #7c5ac2;
-            margin-bottom: 20px;
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: block;
         }
         
         h1 {
-            color: #333;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        p {
-            color: #666;
-            line-height: 1.6;
+            font-size: 2rem;
+            color: #2c5530;
             margin-bottom: 30px;
-            font-size: 18px;
-        }
-        
-        .url-box {
-            background: #f5f7ff;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 25px 0;
-            word-break: break-all;
-            border: 1px dashed #7c5ac2;
-        }
-        
-        .url {
-            color: #5a67d8;
-            font-size: 16px;
-        }
-        
-        .btn {
-            background: linear-gradient(to right, #7c5ac2, #6a82fb);
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            font-size: 18px;
-            border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(122, 90, 194, 0.3);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
+            transition: color 0.3s;
         }
         
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(122, 90, 194, 0.4);
+        h1:hover {
+            color: #5a7d5a;
         }
         
-        .btn:active {
-            transform: translateY(1px);
+        .loading {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
         }
         
-        .btn i {
-            margin-left: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn:hover i {
-            transform: translateX(5px);
-        }
-        
-        .hint {
-            margin-top: 25px;
-            font-size: 14px;
-            color: #999;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            p {
-                font-size: 16px;
-            }
-            
-            .btn {
-                padding: 14px 30px;
-                font-size: 16px;
-            }
+        .countdown {
+            font-weight: bold;
+            color: #2c5530;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">
-            <i class="fas fa-map-signs"></i>
+        <img src="logo.png" alt="AI写作教练" class="logo">
+        <h1 id="jumpLink">AI写作教练·高中语文</h1>
+        <div class="loading">
+            正在跳转到AI写作教练页面（说明：服务器按需定时开放；如果页面不能正常访问，意味着我们的服务器没有开放）... <span id="countdown" class="countdown">5</span>秒
         </div>
-        <h1>页面已迁移</h1>
-        <p>本页内容已迁到下面的地址，点击下方按钮访问新页面</p>
-        
-        <div class="url-box">
-            <span class="url">https://customproject.kmelearning.com/ai-view/index.html#/writing-assistant</span>
-        </div>
-        
-        <button class="btn" onclick="redirectToNewPage()">
-            访问新页面 <i class="fas fa-arrow-right"></i>
-        </button>
-        
-        <p class="hint">如果浏览器没有自动跳转，请点击上方按钮</p>
     </div>
 
     <script>
-        function redirectToNewPage() {
-            window.location.href = "https://customproject.kmelearning.com/ai-view/index.html#/writing-assistant";
-        }
+        // 目标跳转链接
+        const targetUrl = 'https://10366517c035.ngrok-free.app';
         
-        // 可选：添加5秒后自动跳转
-        setTimeout(() => {
-            console.log("即将自动跳转到新页面...");
-        }, 5000);
+        // 获取元素
+        const jumpLink = document.getElementById('jumpLink');
+        const countdownElement = document.getElementById('countdown');
+        
+        // 点击跳转
+        jumpLink.addEventListener('click', function() {
+            window.location.href = targetUrl;
+        });
+        
+        // 自动跳转倒计时
+        let countdown = 5;
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = targetUrl;
+            }
+        }, 1000);
     </script>
 </body>
 </html>
